@@ -15,7 +15,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.0.1
+  version: 0.0.2
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -180,7 +180,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/SendMaxRequest"
-        description: Request to spend all available funds
+        description: Request to all available funds to a given address
         required: true
       responses:
         "202":
@@ -218,7 +218,7 @@ paths:
         "418":
           content: {}
           description: Invalid network for given address
-      summary: Send some amount to a given address   
+      summary: Send all wallet funds to an address  
       tags: 
         - info
 components:
@@ -263,8 +263,13 @@ components:
           type: string
           enum:
             - bch
+            - usd
             - bit
+            - bits
+            - sat
+            - sats
             - satoshi
+            - satoshis
     TransactionId:
       properties:
         transaction:
