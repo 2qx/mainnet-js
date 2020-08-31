@@ -131,7 +131,7 @@ paths:
               allOf:
                 - $ref: "#/components/schemas/SerializedWallet"
               properties:
-                count:
+                output_count:
                   type: number
                   description: |
                     (optional) if sending all funds to multiple addresses, the
