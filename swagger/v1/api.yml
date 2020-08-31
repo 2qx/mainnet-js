@@ -72,7 +72,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BalanceResponse"
-          description: sucessful operation   
+          description: successful operation   
       summary: Get total balance for wallet
       tags: 
         - info
@@ -130,7 +130,15 @@ paths:
         content:
           "application/json":
             schema:
-              $ref: "#/components/schemas/SerializedWallet"
+              allOf:
+                - $ref: "#/components/schemas/SerializedWallet"
+              properties:
+                count:
+                  type: number
+                  description: |
+                    (optional) if sending all funds to multiple addresses, the
+                    count of the number of address funds will be sent 
+                    to may be included.
         description: get amount that will be spend with a spend max request
         required: true
       responses:
@@ -146,7 +154,7 @@ paths:
         "418":
           content: {}
           description: Invalid network for given address
-      summary: Send all wallet funds to an address  
+      summary: Get maximum spendable amount
       tags: 
         - info        
   /wallet/utxo:
@@ -166,7 +174,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UtxoResponse"
-          description: sucessful operation    
+          description: successful operation    
       summary: Get detailed information about unspent outputs (utxos)
       tags:
         - info
@@ -260,7 +268,7 @@ components:
           type: number
           example: 100
         unit: 
-          description: Demoniation for amount
+          description: Denomination for amount
           type: string
           enum:
             - bch
@@ -276,12 +284,15 @@ components:
         bch:
           type: number
           example: 1
+          description: Amount in whole Bitcoin Cash
         sat:
           type: integer
           example: 100000000
+          description: Amount in satoshis
         usd:
           type: number
           example: 438.02
+          description: Amount in United States Dollars
     Outpoint: 
       properties:
         outpoint:
@@ -386,9 +397,9 @@ components:
         - $ref: "#/components/schemas/ToCashaddr" 
         - $ref: "#/components/schemas/Amount"
       required:
+        - cashaddr
         - value
         - unit
-        - cashaddr
     SendResponse:
       allOf:
         - $ref: "#/components/schemas/TransactionId"
