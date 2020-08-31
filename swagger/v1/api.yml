@@ -221,7 +221,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SendResponse"
+                $ref: "#/components/schemas/SendMaxResponse"
           description: transaction accepted
         "400":
           content: {}
@@ -293,6 +293,20 @@ components:
           type: number
           example: 438.02
           description: Amount in United States Dollars
+    ZeroBalanceResponse:
+      properties:
+        bch:
+          type: number
+          example: 0
+          description: Amount in whole Bitcoin Cash
+        sat:
+          type: integer
+          example: 0
+          description: Amount in satoshis
+        usd:
+          type: number
+          example: 0
+          description: Amount in United States Dollars          
     Outpoint: 
       properties:
         outpoint:
@@ -400,7 +414,17 @@ components:
         - cashaddr
         - value
         - unit
+    SendMaxResponse:
+      properties:
+        balance:
+          $ref: "#/components/schemas/ZeroBalanceResponse"                
+      allOf:
+        - $ref: "#/components/schemas/TransactionId"
+      type: object
     SendResponse:
+      properties:
+        balance:
+          $ref: "#/components/schemas/BalanceResponse"                
       allOf:
         - $ref: "#/components/schemas/TransactionId"
       type: object
