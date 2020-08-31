@@ -111,11 +111,9 @@ paths:
       responses:
         "200":
           content:
-            image/png:
+            application/json:
               schema:
-                type: string
-                format: byte
-                example: iVBORw0KGgoAAAANSUhEUgA...  ...Jggg==
+                $ref: "#/components/schemas/PortableNetworkGraphic"
           description: |
             A Qr code image data in png format as base64 encoded string.
             Suitable for inclusion in html using:
@@ -283,6 +281,7 @@ components:
       properties:
         bch:
           type: number
+          format: float
           example: 1
           description: Amount in whole Bitcoin Cash
         sat:
@@ -297,6 +296,7 @@ components:
       properties:
         bch:
           type: number
+          format: float
           example: 0
           description: Amount in whole Bitcoin Cash
         sat:
@@ -309,7 +309,7 @@ components:
           description: Amount in United States Dollars          
     Outpoint: 
       properties:
-        outpoint:
+        utxo_id:
           type: string
           example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0"
           description: serialized outpoint
@@ -328,7 +328,12 @@ components:
       properties:
         cashaddr:
            type: string
-           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0           
+           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0        
+    PortableNetworkGraphic:
+      properties:
+        src:
+          type: string
+          example: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAABHNCSVQ... ...AAAAABJRU5ErkJggg=="
     SendMaxRequest:
       allOf:
         - $ref: "#/components/schemas/SerializedWallet"
@@ -338,14 +343,12 @@ components:
         - cashaddr
     SerializedWallet:
       properties:
-        wallet:
+        wallet_id:
           type: string
           format: password
           example: "testnet:wif:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
-            All information necessary to reconstruct a wallet, in serialized string
-            format in the form "TYPE:NETWORK:SECRET". Note\: NETWORK is 
-            not the same as the cash address prefix.
+            ID that is returned in `wallet` field of /wallet call
       required:
         - wallet               
     DepositAddressResponse:
@@ -353,7 +356,7 @@ components:
         - $ref: "#/components/schemas/Cashaddr"
     UtxoResponse:
       properties:
-        utxos:
+        utxo:
           type: "array"
           items:
             $ref: "#/components/schemas/Utxo"  
