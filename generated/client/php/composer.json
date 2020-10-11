@@ -1,21 +1,19 @@
 {
-    "name": "GIT_USER_ID/GIT_REPO_ID",
+    "name": "mainnet-cash/mainnet",
     "description": "A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** This library is in active development",
     "keywords": [
-        "openapitools",
-        "openapi-generator",
-        "openapi",
+        "bitcoin-cash",
         "php",
         "sdk",
         "rest",
         "api"
     ],
-    "homepage": "https://openapi-generator.tech",
-    "license": "unlicense",
+    "homepage": "https://mainnet.cash",
+    "license": "MIT",
     "authors": [
         {
-            "name": "OpenAPI-Generator contributors",
-            "homepage": "https://openapi-generator.tech"
+            "name": "mainnet",
+            "homepage": "https://github.com/mainnet-cash/mainnet-js/graphs/contributors"
         }
     ],
     "require": {
