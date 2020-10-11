@@ -4,7 +4,8 @@ on:
   push:
     branches: 
       - master
-      - feature/*      
+      - feature/*   
+      - php   
   pull_request:
     branches: 
       - master    
@@ -30,6 +31,11 @@ jobs:
         with:
           args: |
             generate -i swagger/v1/api.yml -g typescript-node -o generated/client/typescript-mock
+      - name: Generate php Client
+        uses: 2qx/codegen-docker-action@v1
+        with:
+          args: |
+            generate -i swagger/v1/api.yml -g php -o generated/client/php --additional-properties=packageName=Mainnet,invokerPackage=Mainnet
       - name: Generate Server
         uses: 2qx/codegen-docker-action@v1
         with:
