@@ -1,6 +1,6 @@
-import { binToHex, instantiateSha256, Sha256 } from "@bitauth/libauth";
 import {
   ElectrumCluster,
+  ElectrumClient,
   ElectrumTransport,
   ClusterOrder,
   RequestResponse,
@@ -9,21 +9,24 @@ import NetworkProvider from "./NetworkProvider";
 import { Utxo, Network } from "../interface";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
-  private electrum: ElectrumCluster;
+  private electrum: ElectrumCluster | ElectrumClient;
   private concurrentRequests: number = 0;
+  private isCluster: boolean = true;
 
   constructor(
     public network: Network = Network.MAINNET,
-    electrum?: ElectrumCluster,
-    private manualConnectionManagement?: boolean
+    electrum?: ElectrumCluster | ElectrumClient,
+    private manualConnectionManagement?: boolean,
   ) {
     // If a custom Electrum Cluster is passed, we use it instead of the default.
     if (electrum) {
       this.electrum = electrum;
+      this.isCluster = electrum.constructor.name === 'ElectrumCluster' ? true : false
       return;
     }
 
     if (network === Network.MAINNET) {
+      this.isCluster = true;
       // Initialize a 2-of-3 Electrum Cluster with 6 reliable hardcoded servers
       // using the first three servers as "priority" servers
       this.electrum = new ElectrumCluster(
@@ -95,6 +98,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         false
       );
     } else if (network === Network.TESTNET) {
+      this.isCluster = true;
       // Initialize a 1-of-2 Electrum Cluster with 2 hardcoded servers
       this.electrum = new ElectrumCluster(
         "CashScript Application",
@@ -116,21 +120,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         false
       );
     } else if (network === Network.REGTEST) {
+      this.isCluster = false;
       //
-      this.electrum = new ElectrumCluster(
-        "CashScript Application",
-        "1.4.1",
-        1,
-        1,
-        ClusterOrder.RANDOM,
-        1020
-      );
-      this.electrum.addServer(
-        "127.0.0.1",
-        60003,
-        ElectrumTransport.WS.Scheme,
-        false
-      );
+      this.electrum = new ElectrumClient('mainnet', '1.4.1', "127.0.0.1", 60003, 'ws');
+     
     } else {
       throw new Error(
         `Tried to instantiate an ElectrumNetworkProvider for unknown network: ${network}`
@@ -178,14 +171,33 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   async connectCluster(): Promise<boolean[]> {
     try {
-      return await this.electrum.startup();
+      return await (this.electrum as ElectrumCluster).startup();
+    } catch (e) {
+      return [];
+    }
+  }
+  async connectClient(): Promise<boolean[]> {
+    try {
+      return [await (this.electrum as ElectrumClient).connect()];
     } catch (e) {
       return [];
     }
   }
 
   async disconnectCluster(): Promise<boolean[]> {
-    return this.electrum.shutdown();
+    try {
+      return await (this.electrum as ElectrumCluster).shutdown();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async disconnectClient(): Promise<boolean[]> {
+    try {
+      return [await (this.electrum as ElectrumClient).disconnect()];
+    } catch (e) {
+      return [];
+    }
   }
 
   private async performRequest(
@@ -194,12 +206,19 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<RequestResponse> {
     // Only connect the cluster when no concurrent requests are running
     if (this.shouldConnect()) {
-      this.connectCluster();
+      if (this.isCluster) {
+        this.connectCluster();
+      } else {
+        await this.connectClient();
+        
+      }
     }
 
     this.concurrentRequests += 1;
 
-    await this.electrum.ready();
+    if (this.isCluster) {
+      await (this.electrum as ElectrumCluster).ready();
+    }
 
     let result;
     try {
@@ -207,7 +226,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     } finally {
       // Always disconnect the cluster, also if the request fails
       if (this.shouldDisconnect()) {
-        await this.disconnectCluster();
+        if (this.isCluster) {
+          await this.disconnectCluster();
+        } else {
+          await this.disconnectClient();
+        }
       }
     }
 
