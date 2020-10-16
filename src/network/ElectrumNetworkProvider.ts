@@ -16,12 +16,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   constructor(
     public network: Network = Network.MAINNET,
     electrum?: ElectrumCluster | ElectrumClient,
-    private manualConnectionManagement?: boolean,
+    private manualConnectionManagement?: boolean
   ) {
     // If a custom Electrum Cluster is passed, we use it instead of the default.
     if (electrum) {
       this.electrum = electrum;
-      this.isCluster = electrum.constructor.name === 'ElectrumCluster' ? true : false
+      this.isCluster =
+        electrum.constructor.name === "ElectrumCluster" ? true : false;
       return;
     }
 
@@ -122,8 +123,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     } else if (network === Network.REGTEST) {
       this.isCluster = false;
       //
-      this.electrum = new ElectrumClient('mainnet', '1.4.1', "127.0.0.1", 60003, 'ws');
-     
+      this.electrum = new ElectrumClient(
+        "mainnet",
+        "1.4.1",
+        "127.0.0.1",
+        60003,
+        "ws"
+      );
     } else {
       throw new Error(
         `Tried to instantiate an ElectrumNetworkProvider for unknown network: ${network}`
@@ -210,7 +216,6 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         this.connectCluster();
       } else {
         await this.connectClient();
-        
       }
     }
 
